@@ -1,3 +1,5 @@
+import { get_http_client } from "./utils/http_client";
+
 export async function get_places_in_map_view_without_keywords(
   south_west_coordinate_latitude,
   south_west_coordinate_longitude,
