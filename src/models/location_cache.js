@@ -64,9 +64,43 @@ export async function get_location_cache_model(
       deletedAt: false,
       underscored: true,
       sequelize: get_db(),
-      schema: get_schema()
+      schema: get_schema(),
+      indexes: [
+        {
+          using: "BTREE",
+          fields: [{ attribute: "should_be_deleted_when", order: "ASC" }]
+        },
+        {
+          using: "hash",
+          fields: ["location_id"]
+        },
+        {
+          name: "lat_asc",
+          using: "BTREE",
+          fields: [{ attribute: "latitude_num", order: "ASC" }]
+        },
+        {
+          name: "long_asc",
+          using: "BTREE",
+          fields: [{ attribute: "longitude_num", order: "ASC" }]
+        },
+        {
+          name: "lat_desc",
+          using: "BTREE",
+          fields: [{ attribute: "latitude_num", order: "DESC" }]
+        },
+        {
+          name: "long_desc",
+          using: "BTREE",
+          fields: [{ attribute: "longitude_num", order: "DESC" }]
+        }
+      ]
     }
   );
+
+  if (process.env.DB_SYNC_FORCE === true) {
+    await LocationCache.sync({ force: true });
+  }
 
   return LocationCache;
 }
