@@ -31,11 +31,26 @@ export function split_to_4_zones_by_center(
     n * 500
   ); //  * 1000 * 0.5
 
-  const point_a = { latitude, longitude: point_e.longitude };
-  const point_b = { latitude: point_d.latitude, longitude };
-  const point_c = { latitude, longitude };
-  const point_f = { latitude: point_e.latitude, longitude };
-  const point_g = { latitude, longitude: point_d.longitude };
+  const point_a = {
+    latitude: latitude.toFixed(6),
+    longitude: point_e.longitude.toFixed(6)
+  };
+  const point_b = {
+    latitude: point_d.latitude.toFixed(6),
+    longitude: longitude.toFixed(6)
+  };
+  const point_c = {
+    latitude: latitude.toFixed(6),
+    longitude: longitude.toFixed(6)
+  };
+  const point_f = {
+    latitude: point_e.latitude.toFixed(6),
+    longitude: longitude.toFixed(6)
+  };
+  const point_g = {
+    latitude: latitude.toFixed(6),
+    longitude: point_d.longitude.toFixed(6)
+  };
 
   return [
     { sw: point_a, ne: point_b },
