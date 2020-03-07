@@ -19,7 +19,7 @@ export function split_to_4_zones_by_center(
   //   |         |         |
   //   |         |         | 0.5n
   //   |         |         |
-  //   a--------cnr--------g
+  //   a---------c---------g
   //   |         |         |
   //   |         |         | 0.5n
   //   |         |         |
