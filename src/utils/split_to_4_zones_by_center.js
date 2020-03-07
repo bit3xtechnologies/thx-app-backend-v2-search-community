@@ -31,12 +31,17 @@ export function split_to_4_zones_by_center(
     n * 500
   ); //  * 1000 * 0.5
 
+  point_e.latitude = point_e.latitude.toFixed(6);
+  point_e.longitude = point_e.longitude.toFixed(6);
+  point_d.latitude = point_d.latitude.toFixed(6);
+  point_d.longitude = point_d.longitude.toFixed(6);
+
   const point_a = {
     latitude: latitude.toFixed(6),
-    longitude: point_e.longitude.toFixed(6)
+    longitude: point_e.longitude
   };
   const point_b = {
-    latitude: point_d.latitude.toFixed(6),
+    latitude: point_d.latitude,
     longitude: longitude.toFixed(6)
   };
   const point_c = {
@@ -44,12 +49,12 @@ export function split_to_4_zones_by_center(
     longitude: longitude.toFixed(6)
   };
   const point_f = {
-    latitude: point_e.latitude.toFixed(6),
+    latitude: point_e.latitude,
     longitude: longitude.toFixed(6)
   };
   const point_g = {
     latitude: latitude.toFixed(6),
-    longitude: point_d.longitude.toFixed(6)
+    longitude: point_d.longitude
   };
 
   return [
