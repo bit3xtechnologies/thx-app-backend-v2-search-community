@@ -1,18 +1,6 @@
 import { Sequelize, Transaction } from "sequelize";
 
-let _db = null;
-
-let _schema = null;
-
-export function get_db() {
-  return _db;
-}
-
-export function get_schema() {
-  return _schema;
-}
-
-export async function connect_db(
+export async function connect_db({
   host,
   port,
   username,
@@ -21,11 +9,7 @@ export async function connect_db(
   database,
   logging,
   logger
-) {
-  if (_db !== null) {
-    return _db;
-  }
-
+}) {
   try {
     const db_config = {
       host,
@@ -52,10 +36,10 @@ export async function connect_db(
         idle: 3000,
         acquire: 12000
       },
-      isolationLevel: Transaction.ISOLATION_LEVELS.REPEATABLE_READ
+      isolationLevel: Transaction.ISOLATION_LEVELS.READ_COMMITTED
     };
 
-    _db = new Sequelize(db_config);
+    const _db = new Sequelize(db_config);
 
     await _db.authenticate();
 
@@ -71,8 +55,6 @@ export async function connect_db(
 
     await _db.createSchema(schema);
 
-    _schema = schema;
-
     return _db;
   } catch (error) {
     if (logger !== undefined) {
@@ -86,5 +68,7 @@ export async function connect_db(
         "Search-Communities::Unable to connect to the database:"
       );
     }
+
+    throw error;
   }
 }

@@ -1,35 +1,7 @@
 import { DataTypes } from "sequelize";
 
-import { connect_db, get_db, get_schema } from "../utils/db";
-
-let LocationCache = null;
-
-export async function get_location_cache_model(
-  host,
-  port,
-  username,
-  password,
-  schema,
-  database,
-  logging,
-  logger
-) {
-  if (LocationCache !== null) {
-    return LocationCache;
-  }
-
-  const db = await connect_db(
-    host,
-    port,
-    username,
-    password,
-    schema,
-    database,
-    logging,
-    logger
-  );
-
-  LocationCache = db.define(
+export async function get_location_cache_model(db, schema) {
+  const LocationCache = db.define(
     "LocationCache",
     {
       cache_id: {
@@ -63,15 +35,15 @@ export async function get_location_cache_model(
       updatedAt: false,
       deletedAt: false,
       underscored: true,
-      sequelize: get_db(),
-      schema: get_schema(),
+      sequelize: db,
+      schema,
       indexes: [
         {
           using: "BTREE",
           fields: [{ attribute: "should_be_deleted_when", order: "ASC" }]
         },
         {
-          using: "hash",
+          using: "HASH",
           fields: ["location_id"]
         },
         {
@@ -100,6 +72,8 @@ export async function get_location_cache_model(
 
   if (process.env.DB_SYNC_FORCE === true) {
     await LocationCache.sync({ force: true });
+  } else {
+    await LocationCache.sync({ force: false });
   }
 
   return LocationCache;
