@@ -15,11 +15,11 @@ export async function get_location_cache_model(db, schema) {
         type: DataTypes.STRING,
         allowNull: false
       },
-      name: { type: DataTypes.TEXT, allowNull: true },
-      latitude_num: { type: DataTypes.DOUBLE(10, 6), allowNull: false },
-      longitude_num: { type: DataTypes.DOUBLE(10, 6), allowNull: false },
-      latitude_raw_str: { type: DataTypes.TEXT, allowNull: true },
-      longitude_raw_str: { type: DataTypes.TEXT, allowNull: true },
+      name: { type: DataTypes.TEXT, allowNull: false },
+      latitude_num: { type: DataTypes.DOUBLE, allowNull: false },
+      longitude_num: { type: DataTypes.DOUBLE, allowNull: false },
+      latitude_raw_str: { type: DataTypes.TEXT, allowNull: false },
+      longitude_raw_str: { type: DataTypes.TEXT, allowNull: false },
       raw_content: { type: DataTypes.JSON, allowNull: false },
       should_be_deleted_when: {
         type: DataTypes.DATE,

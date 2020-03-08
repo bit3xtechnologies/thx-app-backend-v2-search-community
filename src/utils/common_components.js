@@ -15,7 +15,7 @@ export async function merge_rectangle_results_from_db_and_api(
   lang,
   self
 ) {
-  const tmpCacheKey = self.getCacheKey(
+  const tmpCacheKey = self.get_cache_key(
     south_west_coordinate_latitude,
     south_west_coordinate_longitude,
     north_east_coordinate_latitude,

@@ -14,7 +14,7 @@ import { merge_rectangle_results_from_db_and_api } from "./utils/common_componen
 
 import { split_to_4_zones_by_center } from "./utils/split_to_4_zones_by_center";
 
-export async function CommunitySearch(
+export default function CommunitySearch(
   foursquare_client_id,
   foursquare_client_secret,
   postgres_db_config,
@@ -41,12 +41,18 @@ export async function CommunitySearch(
 
     self.redis = get_redis(redis_config);
 
-    self.db = await connect_db(self.postgres_db_config);
+    self.db = null;
 
-    self.location_cache_model = await get_location_cache_model(
-      self.db,
-      self.postgres_db_config.schema
-    );
+    self.location_cache_model = null;
+
+    (async function() {
+      self.db = await connect_db(self.postgres_db_config);
+
+      self.location_cache_model = await get_location_cache_model(
+        self.db,
+        self.postgres_db_config.schema
+      );
+    })();
 
     self.any_to_fixed_float = function(f, n) {
       return parseFloat(parseFloat(f).toFixed(n));
@@ -54,7 +60,7 @@ export async function CommunitySearch(
 
     self.merge_rectangle_results_from_db_and_api = merge_rectangle_results_from_db_and_api;
 
-    self.getCacheKey = function(
+    self.get_cache_key = function(
       south_west_coordinate_latitude,
       south_west_coordinate_longitude,
       north_east_coordinate_latitude,
