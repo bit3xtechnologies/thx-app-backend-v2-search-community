@@ -26,7 +26,7 @@ export async function merge_rectangle_results_from_db_and_api(
 
   const tmpCacheResult = await self.redis.get(tmpCacheKey);
   if (tmpCacheResult !== null && tmpCacheResult !== undefined) {
-    return JSON.parse(tmpCacheResult);
+    return JSON.parse(Buffer.from(tmpCacheResult, "base64").toString("utf-8"));
   }
 
   const tmpAxiosConfig = {
@@ -55,14 +55,17 @@ export async function merge_rectangle_results_from_db_and_api(
   if (self.postgres_db_config.logger) {
     self.postgres_db_config.logger.trace(tmpAxiosConfig);
   } else {
-    console.trace(tmpAxiosConfig);
+    console.trace(
+      JSON.stringify(tmpAxiosConfig, null, 2),
+      "Search-Communities::tmpAxiosConfig"
+    );
   }
 
   const { data } = await self.limiter.schedule(() =>
     self.http_client.request(tmpAxiosConfig)
   );
 
-  const from_db = await self.location_cache_model.findAll({
+  const tmpModelFindAllConfig = {
     where: {
       [Op.and]: [
         {
@@ -95,7 +98,26 @@ export async function merge_rectangle_results_from_db_and_api(
     },
     order: [["cache_id", "DESC"]],
     limit: 5000
-  });
+  };
+
+  if (keyword !== undefined && keyword !== "" && keyword !== null) {
+    tmpModelFindAllConfig.where[Op.and].push({
+      keyword_str: { [Op.iLike]: `%${keyword}%` }
+    });
+  }
+
+  if (self.postgres_db_config.logger) {
+    self.postgres_db_config.logger.trace(tmpModelFindAllConfig);
+  } else {
+    console.trace(
+      JSON.stringify(tmpModelFindAllConfig, null, 2),
+      "Search-Communities::tmpModelFindAllConfig"
+    );
+  }
+
+  const from_db = await self.location_cache_model.findAll(
+    tmpModelFindAllConfig
+  );
 
   if (
     data &&
@@ -124,6 +146,7 @@ export async function merge_rectangle_results_from_db_and_api(
         return {
           location_id: v.id,
           name: v.name,
+          keyword_str: keyword,
           latitude_num: self.any_to_fixed_float(v.location.lat, 6),
           longitude_num: self.any_to_fixed_float(v.location.lng, 6),
           latitude_raw_str: `${v.location.lat}`,
@@ -167,14 +190,18 @@ export async function merge_rectangle_results_from_db_and_api(
       }
     ]);
 
-    await redis.setex(
+    await self.redis.setex(
       tmpCacheKey,
-      JSON.stringify(sortedResult),
-      `${cache_ttl_sec}`
+      `${cache_ttl_sec}`,
+      Buffer.from(JSON.stringify(sortedResult)).toString("base64")
     );
     return sortedResult;
   } else {
-    await redis.setex(tmpCacheKey, "[]", `${cache_ttl_sec}`);
+    await self.redis.setex(
+      tmpCacheKey,
+      `${cache_ttl_sec}`,
+      Buffer.from(JSON.stringify([])).toString("base64")
+    );
     return [];
   }
 }

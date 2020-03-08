@@ -24,9 +24,9 @@ export async function connect_db({
           ? logging
           : (...args) => {
               if (logger !== undefined) {
-                logger.trace(args[0], "Search-Communities::Sequelize logging");
+                logger.info(args[0], "Search-Communities::Sequelize logging");
               } else {
-                console.trace(args[0], "Search-Communities::Sequelize logging");
+                console.info(args[0], "Search-Communities::Sequelize logging");
               }
             },
       benchmark: process.env.NODE_ENV === "development",

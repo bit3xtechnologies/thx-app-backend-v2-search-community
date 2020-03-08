@@ -2,6 +2,8 @@ import Bottleneck from "bottleneck";
 
 import { sortBy, uniqBy } from "lodash";
 
+import { getDistance } from "geolib";
+
 import { get_location_cache_model } from "./models/location_cache";
 
 import { get_http_client } from "./utils/http_client";
@@ -162,7 +164,14 @@ export default function CommunitySearch(
           )
         );
 
-        const result = sortBy(uniqBy(tmpResults, "id"), [
+        const flatten_tmp_result = [];
+        tmpResults.forEach(r => {
+          r.forEach(v => {
+            flatten_tmp_result.push(v);
+          });
+        });
+
+        const result = sortBy(uniqBy(flatten_tmp_result, "id"), [
           v => {
             return getDistance(
               {

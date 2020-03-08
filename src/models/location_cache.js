@@ -16,6 +16,7 @@ export async function get_location_cache_model(db, schema) {
         allowNull: false
       },
       name: { type: DataTypes.TEXT, allowNull: false },
+      keyword_str: { type: DataTypes.STRING, allowNull: false },
       latitude_num: { type: DataTypes.DOUBLE, allowNull: false },
       longitude_num: { type: DataTypes.DOUBLE, allowNull: false },
       latitude_raw_str: { type: DataTypes.TEXT, allowNull: false },
@@ -38,6 +39,9 @@ export async function get_location_cache_model(db, schema) {
       sequelize: db,
       schema,
       indexes: [
+        {
+          fields: ["keyword_str"]
+        },
         {
           using: "BTREE",
           fields: [{ attribute: "should_be_deleted_when", order: "ASC" }]
@@ -85,7 +89,7 @@ export async function get_location_cache_model(db, schema) {
     }
   );
 
-  if (process.env.DB_SYNC_FORCE === true) {
+  if (process.env.DB_SYNC_FORCE === "true") {
     await LocationCache.sync({ force: true });
   } else {
     await LocationCache.sync({ force: false });
