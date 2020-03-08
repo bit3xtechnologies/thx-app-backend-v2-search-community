@@ -20,9 +20,9 @@ export default function CommunitySearch(
   postgres_db_config,
   redis_config
 ) {
-  try {
-    const self = this;
+  const self = this;
 
+  try {
     self.postgres_db_config = postgres_db_config;
 
     self.limiter = new Bottleneck({
