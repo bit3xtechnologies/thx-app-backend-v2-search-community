@@ -1,6 +1,6 @@
 {
   "name": "thx-app-backend-v2-search-community",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "./src/index.js",
   "scripts": {
     "format": "prettier --write ./**/*.json && prettier --write ./**/*.js"
