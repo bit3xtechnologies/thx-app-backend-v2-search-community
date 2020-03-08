@@ -43,7 +43,7 @@ const cs = new CommunitySearch(
   redis_config
 );
 
-// for a while, wait for the db and redis loading
+// wait for a while, wait for the db and redis loading
 async function f() {
   try {
     // if empty keyword, set ""
