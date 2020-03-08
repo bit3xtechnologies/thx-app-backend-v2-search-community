@@ -4,7 +4,7 @@ import { getCenter, getDistance } from "geolib";
 
 import { Op } from "sequelize";
 
-const cache_ttl_sec = 1209600;
+const cache_ttl_sec = 86400;
 
 export async function merge_rectangle_results_from_db_and_api(
   south_west_coordinate_latitude,
@@ -52,15 +52,6 @@ export async function merge_rectangle_results_from_db_and_api(
     }
   };
 
-  if (self.postgres_db_config.logger) {
-    self.postgres_db_config.logger.trace(tmpAxiosConfig);
-  } else {
-    console.trace(
-      JSON.stringify(tmpAxiosConfig, null, 2),
-      "Search-Communities::tmpAxiosConfig"
-    );
-  }
-
   const { data } = await self.limiter.schedule(() =>
     self.http_client.request(tmpAxiosConfig)
   );
@@ -106,15 +97,6 @@ export async function merge_rectangle_results_from_db_and_api(
     });
   }
 
-  if (self.postgres_db_config.logger) {
-    self.postgres_db_config.logger.trace(tmpModelFindAllConfig);
-  } else {
-    console.trace(
-      JSON.stringify(tmpModelFindAllConfig, null, 2),
-      "Search-Communities::tmpModelFindAllConfig"
-    );
-  }
-
   const from_db = await self.location_cache_model.findAll(
     tmpModelFindAllConfig
   );
@@ -125,6 +107,8 @@ export async function merge_rectangle_results_from_db_and_api(
     data.response.venues &&
     data.response.venues.length > 0
   ) {
+    console.log("API", data.response.venues, tmpAxiosConfig);
+
     const tmpDBMap = {};
     from_db
       .map(r => r.toJSON())

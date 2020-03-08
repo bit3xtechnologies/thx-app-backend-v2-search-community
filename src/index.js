@@ -70,6 +70,16 @@ export default function CommunitySearch(
       keyword,
       lang
     ) {
+      const converted_keyword = Buffer.from(
+        keyword === undefined || keyword === null || keyword === ""
+          ? "0"
+          : keyword
+      ).toString("base64");
+
+      const converted_lang = Buffer.from(
+        lang === undefined || lang === null || lang === "" ? "0" : lang
+      ).toString("base64");
+
       return `${self.any_to_fixed_float(
         south_west_coordinate_latitude,
         4
@@ -82,7 +92,7 @@ export default function CommunitySearch(
       )}:${self.any_to_fixed_float(
         north_east_coordinate_longitude,
         4
-      )}:${keyword || "n"}:${lang || "n"}`;
+      )}:${converted_keyword}:${converted_lang}`;
     };
 
     self.get_places_in_map_view = async function(
