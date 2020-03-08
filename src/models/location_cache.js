@@ -65,6 +65,21 @@ export async function get_location_cache_model(db, schema) {
           name: "long_desc",
           using: "BTREE",
           fields: [{ attribute: "longitude_num", order: "DESC" }]
+        },
+        {
+          name: "cache_id_desc_idx_x",
+          using: "BTREE",
+          fields: [{ attribute: "cache_id", order: "DESC" }]
+        },
+        {
+          name: "cache_id_asc_idx_x",
+          using: "BTREE",
+          fields: [{ attribute: "cache_id", order: "ASC" }]
+        },
+        {
+          name: "should_be_deleted_when_asc",
+          using: "BTREE",
+          fields: [{ attribute: "should_be_deleted_when", order: "ASC" }]
         }
       ]
     }
