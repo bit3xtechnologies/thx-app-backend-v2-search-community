@@ -20,15 +20,15 @@ export async function connect_db({
       dialect: "postgres",
       native: false,
       logging:
-        logging === true || logging === false
-          ? logging
-          : (...args) => {
+        logging === true
+          ? (...args) => {
               if (logger !== undefined) {
-                logger.info(args[0], "Search-Communities::Sequelize logging");
+                logger.info(args[0], "#Sequelize logging");
               } else {
-                console.info(args[0], "Search-Communities::Sequelize logging");
+                console.info(args[0], "#Sequelize logging");
               }
-            },
+            }
+          : false,
       benchmark: process.env.NODE_ENV === "development",
       pool: {
         max: 8,
@@ -44,13 +44,9 @@ export async function connect_db({
     await _db.authenticate();
 
     if (logger !== undefined) {
-      logger.info(
-        "Search-Communities::DB connection has been established successfully."
-      );
+      logger.info("#DB connection has been established successfully.");
     } else {
-      console.info(
-        "Search-Communities::DB connection has been established successfully."
-      );
+      console.info("#DB connection has been established successfully.");
     }
 
     await _db.createSchema(schema);
@@ -58,15 +54,9 @@ export async function connect_db({
     return _db;
   } catch (error) {
     if (logger !== undefined) {
-      logger.error(
-        error,
-        "Search-Communities::Unable to connect to the database:"
-      );
+      logger.error(error, "#Unable to connect to the database:");
     } else {
-      console.error(
-        error,
-        "Search-Communities::Unable to connect to the database:"
-      );
+      console.error(error, "#Unable to connect to the database:");
     }
 
     throw error;
