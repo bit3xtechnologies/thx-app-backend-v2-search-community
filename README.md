@@ -3,15 +3,15 @@
 ### Install
 
 ```sh
-npm  install @bit3x/search-community@0.1.1
+npm  install @bit3x/search-community
 # or
-yarn add     @bit3x/search-community@0.1.1
+yarn add     @bit3x/search-community
 ```
 
 ### Usage
 
 ```javascript
-const CommunitySearch = require("thx-app-backend-v2-search-community");
+const CommunitySearch = require("@bit3x/search-community");
 
 const foursquare_client_id = "CLIENT_ID";
 
