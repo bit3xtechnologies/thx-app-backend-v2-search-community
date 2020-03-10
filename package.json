@@ -1,6 +1,6 @@
 {
   "name": "thx-app-backend-v2-search-community",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "./dist/community_search.js",
   "scripts": {
     "format": "prettier --write ./**/*.json && prettier --write ./**/*.js",

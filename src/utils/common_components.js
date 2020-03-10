@@ -161,18 +161,20 @@ export async function merge_rectangle_results_from_db_and_api(
       }
     ]);
 
-    const sortedResult = sortBy(tmpResult, [
-      v => {
-        return getDistance(
-          {
-            latitude: v.location.lat,
-            longitude: v.location.lng
-          },
-          center,
-          1
-        );
-      }
-    ]);
+    tmpResult.forEach(r => {
+      r.center = center;
+      r.distance = getDistance(
+        {
+          latitude: r.location.lat,
+          longitude: r.location.lng
+        },
+        r.center,
+        1
+      );
+      r.distance_to_center = r.distance;
+    });
+
+    const sortedResult = sortBy(tmpResult, ["distance_to_center"]);
 
     await self.redis.setex(
       tmpCacheKey,

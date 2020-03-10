@@ -96,13 +96,26 @@ export default function CommunitySearch(
     };
 
     self.get_places_in_map_view = async function(
-      south_west_coordinate_latitude,
-      south_west_coordinate_longitude,
-      north_east_coordinate_latitude,
-      north_east_coordinate_longitude,
+      _south_west_coordinate_latitude,
+      _south_west_coordinate_longitude,
+      _north_east_coordinate_latitude,
+      _north_east_coordinate_longitude,
       keyword,
       lang
     ) {
+      const south_west_coordinate_latitude = parseFloat(
+        _south_west_coordinate_latitude
+      );
+      const south_west_coordinate_longitude = parseFloat(
+        _south_west_coordinate_longitude
+      );
+      const north_east_coordinate_latitude = parseFloat(
+        _north_east_coordinate_latitude
+      );
+      const north_east_coordinate_longitude = parseFloat(
+        _north_east_coordinate_longitude
+      );
+
       try {
         if (
           getDistance(
@@ -149,11 +162,18 @@ export default function CommunitySearch(
     };
 
     self.get_places_in_hugearea_with_keyword = async function(
-      center_coordinate_latitude,
-      center_coordinate_longitude,
+      _center_coordinate_latitude,
+      _center_coordinate_longitude,
       keyword,
       lang
     ) {
+      const center_coordinate_latitude = parseFloat(
+        _center_coordinate_latitude
+      );
+      const center_coordinate_longitude = parseFloat(
+        _center_coordinate_longitude
+      );
+
       try {
         const zs = split_to_4_zones_by_center(
           center_coordinate_latitude,
@@ -181,20 +201,24 @@ export default function CommunitySearch(
           });
         });
 
+        flatten_tmp_result.forEach(r => {
+          r.center = {
+            latitude: center_coordinate_latitude,
+            longitude: center_coordinate_longitude
+          };
+          r.distance = getDistance(
+            {
+              latitude: r.location.lat,
+              longitude: r.location.lng
+            },
+            r.center,
+            1
+          );
+          r.distance_to_center = r.distance;
+        });
+
         const result = sortBy(uniqBy(flatten_tmp_result, "id"), [
-          v => {
-            return getDistance(
-              {
-                latitude: v.location.lat,
-                longitude: v.location.lng
-              },
-              {
-                latitude: center_coordinate_latitude,
-                longitude: center_coordinate_longitude
-              },
-              1
-            );
-          }
+          "distance_to_center"
         ]);
 
         return result;
