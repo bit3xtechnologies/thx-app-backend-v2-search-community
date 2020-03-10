@@ -3,9 +3,9 @@
 ### Install
 
 ```sh
-npm  install https://bitbucket.org/bit3x/thx-app-backend-v2-search-community#0.0.5
+npm  install @bit3x/search-community@0.1.1
 # or
-yarn add     https://bitbucket.org/bit3x/thx-app-backend-v2-search-community#0.0.5
+yarn add     @bit3x/search-community@0.1.1
 ```
 
 ### Usage
