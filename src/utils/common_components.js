@@ -29,32 +29,50 @@ export async function merge_rectangle_results_from_db_and_api(
     return JSON.parse(Buffer.from(tmpCacheResult, "base64").toString("utf-8"));
   }
 
-  const tmpAxiosConfig = {
-    headers: {
-      "Accept-Language":
-        lang === undefined || lang === "" || lang === null ? "en" : lang
-    },
-    params: {
-      ...self.default_param,
-      intent: "browse",
-      sw: `${self.any_to_fixed_float(
-        south_west_coordinate_latitude,
-        6
-      )},${self.any_to_fixed_float(south_west_coordinate_longitude, 6)}`,
-      ne: `${self.any_to_fixed_float(
-        north_east_coordinate_latitude,
-        6
-      )},${self.any_to_fixed_float(north_east_coordinate_longitude, 6)}`,
-      query:
-        keyword === undefined || keyword === "" || keyword === null
-          ? undefined
-          : keyword
-    }
-  };
+  const [data_browse, data_checkin] = await Promise.all([
+    api_call_intent(
+      "browse",
+      south_west_coordinate_latitude,
+      south_west_coordinate_longitude,
+      north_east_coordinate_latitude,
+      north_east_coordinate_longitude,
+      keyword,
+      lang,
+      self
+    ),
+    api_call_intent(
+      "checkin",
+      south_west_coordinate_latitude,
+      south_west_coordinate_longitude,
+      north_east_coordinate_latitude,
+      north_east_coordinate_longitude,
+      keyword,
+      lang,
+      self
+    )
+  ]);
 
-  const { data } = await self.limiter.schedule(() =>
-    self.http_client.request(tmpAxiosConfig)
-  );
+  const data = { response: { venues: [] } };
+
+  data.response.venues = uniqBy(
+    [...data_browse.response.venues, ...data_checkin.response.venues],
+    "id"
+  ).filter(v => {
+    if (
+      self.any_to_fixed_float(v.location.lat, 3) >=
+        self.any_to_fixed_float(south_west_coordinate_latitude, 3) - 0.001 &&
+      self.any_to_fixed_float(v.location.lng, 3) >=
+        self.any_to_fixed_float(south_west_coordinate_longitude, 3) - 0.001 &&
+      self.any_to_fixed_float(v.location.lat, 3) <=
+        self.any_to_fixed_float(north_east_coordinate_latitude, 3) + 0.001 &&
+      self.any_to_fixed_float(v.location.lng, 3) <=
+        self.any_to_fixed_float(north_east_coordinate_longitude, 3) + 0.001
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  });
 
   const tmpModelFindAllConfig = {
     where: {
@@ -107,8 +125,6 @@ export async function merge_rectangle_results_from_db_and_api(
     data.response.venues &&
     data.response.venues.length > 0
   ) {
-    console.log("API", data.response.venues, tmpAxiosConfig);
-
     const tmpDBMap = {};
     from_db
       .map(r => r.toJSON())
@@ -190,4 +206,66 @@ export async function merge_rectangle_results_from_db_and_api(
     );
     return [];
   }
+}
+
+export async function api_call_intent(
+  intent,
+  south_west_coordinate_latitude,
+  south_west_coordinate_longitude,
+  north_east_coordinate_latitude,
+  north_east_coordinate_longitude,
+  keyword,
+  lang,
+  self
+) {
+  const tmpAxiosConfig = {
+    headers: {
+      "Accept-Language":
+        lang === undefined || lang === "" || lang === null ? "en" : lang
+    },
+    params: {
+      ...self.default_param,
+      intent,
+      query:
+        keyword === undefined || keyword === "" || keyword === null
+          ? undefined
+          : keyword
+    }
+  };
+
+  if (intent === "browse") {
+    tmpAxiosConfig.params.sw = `${self.any_to_fixed_float(
+      south_west_coordinate_latitude,
+      6
+    )},${self.any_to_fixed_float(south_west_coordinate_longitude, 6)}`;
+
+    tmpAxiosConfig.params.ne = `${self.any_to_fixed_float(
+      north_east_coordinate_latitude,
+      6
+    )},${self.any_to_fixed_float(north_east_coordinate_longitude, 6)}`;
+  }
+
+  if (intent === "checkin") {
+    const tmpCenter = getCenter([
+      {
+        latitude: south_west_coordinate_latitude,
+        longitude: south_west_coordinate_longitude
+      },
+      {
+        latitude: north_east_coordinate_latitude,
+        longitude: north_east_coordinate_longitude
+      }
+    ]);
+    tmpAxiosConfig.params.ll = `${tmpCenter.latitude},${tmpCenter.longitude}`;
+  }
+
+  const { data } = await self.limiter.schedule(() =>
+    self.http_client.request(tmpAxiosConfig)
+  );
+
+  if (data && data.response && data.response.venues) {
+    console.log("API", data.response.venues, tmpAxiosConfig);
+  }
+
+  return data;
 }

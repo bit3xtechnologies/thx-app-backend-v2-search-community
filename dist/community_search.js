@@ -661,6 +661,7 @@ async function connect_db({
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "merge_rectangle_results_from_db_and_api", function() { return merge_rectangle_results_from_db_and_api; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "api_call_intent", function() { return api_call_intent; });
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var geolib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
@@ -698,32 +699,50 @@ async function merge_rectangle_results_from_db_and_api(
     return JSON.parse(Buffer.from(tmpCacheResult, "base64").toString("utf-8"));
   }
 
-  const tmpAxiosConfig = {
-    headers: {
-      "Accept-Language":
-        lang === undefined || lang === "" || lang === null ? "en" : lang
-    },
-    params: {
-      ...self.default_param,
-      intent: "browse",
-      sw: `${self.any_to_fixed_float(
-        south_west_coordinate_latitude,
-        6
-      )},${self.any_to_fixed_float(south_west_coordinate_longitude, 6)}`,
-      ne: `${self.any_to_fixed_float(
-        north_east_coordinate_latitude,
-        6
-      )},${self.any_to_fixed_float(north_east_coordinate_longitude, 6)}`,
-      query:
-        keyword === undefined || keyword === "" || keyword === null
-          ? undefined
-          : keyword
-    }
-  };
+  const [data_browse, data_checkin] = await Promise.all([
+    api_call_intent(
+      "browse",
+      south_west_coordinate_latitude,
+      south_west_coordinate_longitude,
+      north_east_coordinate_latitude,
+      north_east_coordinate_longitude,
+      keyword,
+      lang,
+      self
+    ),
+    api_call_intent(
+      "checkin",
+      south_west_coordinate_latitude,
+      south_west_coordinate_longitude,
+      north_east_coordinate_latitude,
+      north_east_coordinate_longitude,
+      keyword,
+      lang,
+      self
+    )
+  ]);
 
-  const { data } = await self.limiter.schedule(() =>
-    self.http_client.request(tmpAxiosConfig)
-  );
+  const data = { response: { venues: [] } };
+
+  data.response.venues = Object(lodash__WEBPACK_IMPORTED_MODULE_0__["uniqBy"])(
+    [...data_browse.response.venues, ...data_checkin.response.venues],
+    "id"
+  ).filter(v => {
+    if (
+      self.any_to_fixed_float(v.location.lat, 3) >=
+        self.any_to_fixed_float(south_west_coordinate_latitude, 3) - 0.001 &&
+      self.any_to_fixed_float(v.location.lng, 3) >=
+        self.any_to_fixed_float(south_west_coordinate_longitude, 3) - 0.001 &&
+      self.any_to_fixed_float(v.location.lat, 3) <=
+        self.any_to_fixed_float(north_east_coordinate_latitude, 3) + 0.001 &&
+      self.any_to_fixed_float(v.location.lng, 3) <=
+        self.any_to_fixed_float(north_east_coordinate_longitude, 3) + 0.001
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  });
 
   const tmpModelFindAllConfig = {
     where: {
@@ -776,8 +795,6 @@ async function merge_rectangle_results_from_db_and_api(
     data.response.venues &&
     data.response.venues.length > 0
   ) {
-    console.log("API", data.response.venues, tmpAxiosConfig);
-
     const tmpDBMap = {};
     from_db
       .map(r => r.toJSON())
@@ -859,6 +876,68 @@ async function merge_rectangle_results_from_db_and_api(
     );
     return [];
   }
+}
+
+async function api_call_intent(
+  intent,
+  south_west_coordinate_latitude,
+  south_west_coordinate_longitude,
+  north_east_coordinate_latitude,
+  north_east_coordinate_longitude,
+  keyword,
+  lang,
+  self
+) {
+  const tmpAxiosConfig = {
+    headers: {
+      "Accept-Language":
+        lang === undefined || lang === "" || lang === null ? "en" : lang
+    },
+    params: {
+      ...self.default_param,
+      intent,
+      query:
+        keyword === undefined || keyword === "" || keyword === null
+          ? undefined
+          : keyword
+    }
+  };
+
+  if (intent === "browse") {
+    tmpAxiosConfig.params.sw = `${self.any_to_fixed_float(
+      south_west_coordinate_latitude,
+      6
+    )},${self.any_to_fixed_float(south_west_coordinate_longitude, 6)}`;
+
+    tmpAxiosConfig.params.ne = `${self.any_to_fixed_float(
+      north_east_coordinate_latitude,
+      6
+    )},${self.any_to_fixed_float(north_east_coordinate_longitude, 6)}`;
+  }
+
+  if (intent === "checkin") {
+    const tmpCenter = Object(geolib__WEBPACK_IMPORTED_MODULE_1__["getCenter"])([
+      {
+        latitude: south_west_coordinate_latitude,
+        longitude: south_west_coordinate_longitude
+      },
+      {
+        latitude: north_east_coordinate_latitude,
+        longitude: north_east_coordinate_longitude
+      }
+    ]);
+    tmpAxiosConfig.params.ll = `${tmpCenter.latitude},${tmpCenter.longitude}`;
+  }
+
+  const { data } = await self.limiter.schedule(() =>
+    self.http_client.request(tmpAxiosConfig)
+  );
+
+  if (data && data.response && data.response.venues) {
+    console.log("API", data.response.venues, tmpAxiosConfig);
+  }
+
+  return data;
 }
 
 
