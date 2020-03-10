@@ -11,7 +11,7 @@ yarn add     https://bitbucket.org/bit3x/thx-app-backend-v2-search-community#0.0
 ### Usage
 
 ```javascript
-import CommunitySearch from "thx-app-backend-v2-search-community";
+const CommunitySearch = require("thx-app-backend-v2-search-community");
 
 const foursquare_client_id = "CLIENT_ID";
 
