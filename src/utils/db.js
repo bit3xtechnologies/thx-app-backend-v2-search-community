@@ -29,7 +29,6 @@ export async function connect_db({
               }
             }
           : false,
-      benchmark: process.env.NODE_ENV === "development",
       pool: {
         max: 4,
         min: 2,

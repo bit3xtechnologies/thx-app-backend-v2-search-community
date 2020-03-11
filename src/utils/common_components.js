@@ -110,9 +110,17 @@ export async function merge_rectangle_results_from_db_and_api(
   };
 
   if (keyword !== undefined && keyword !== "" && keyword !== null) {
-    tmpModelFindAllConfig.where[Op.and].push({
-      keyword_str: { [Op.iLike]: `%${keyword}%` }
-    });
+    const tmpSplitted = keyword.split(/[\s\+]/).filter(c => c.length > 0);
+
+    if (tmpSplitted.length > 0) {
+      tmpModelFindAllConfig.where[Op.and].push({
+        keyword_str: { [Op.iLike]: `%${tmpSplitted.join("%")}%` }
+      });
+    } else {
+      tmpModelFindAllConfig.where[Op.and].push({
+        keyword_str: { [Op.iLike]: `%${keyword}%` }
+      });
+    }
   }
 
   const from_db = await self.location_cache_model.findAll(
@@ -156,7 +164,9 @@ export async function merge_rectangle_results_from_db_and_api(
         };
       });
 
-    await self.location_cache_model.bulkCreate(ready_to_be_written_in_db);
+    await self.location_cache_model.bulkCreate(ready_to_be_written_in_db, {
+      logging: false
+    });
 
     const tmpResult = uniqBy(
       [
