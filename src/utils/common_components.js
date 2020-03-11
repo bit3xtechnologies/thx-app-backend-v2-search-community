@@ -269,3 +269,13 @@ export async function api_call_intent(
 
   return data;
 }
+
+export async function clean_cache_in_db(self) {
+  return await self.location_cache_model.destroy({
+    where: {
+      should_be_deleted_when: {
+        [Op.lte]: Date.now()
+      }
+    }
+  });
+}

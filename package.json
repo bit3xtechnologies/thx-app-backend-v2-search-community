@@ -1,6 +1,6 @@
 {
   "name": "@bit3x/search-community",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "main": "./dist/community_search.js",
   "scripts": {
     "format": "prettier --write ./**/*.json && prettier --write ./**/*.js",
@@ -13,7 +13,6 @@
     "axios": "^0.19.2",
     "bignumber.js": "^9.0.0",
     "bottleneck": "^2.19.5",
-    "esm": "^3.2.25",
     "geolib": "^3.2.1",
     "ioredis": "^4.16.0",
     "lodash": "^4.17.15",

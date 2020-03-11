@@ -169,14 +169,40 @@ function CommunitySearch(
 
     self.location_cache_model = null;
 
-    (async function() {
-      self.db = await Object(_utils_db__WEBPACK_IMPORTED_MODULE_6__["connect_db"])(self.postgres_db_config);
+    self.db_and_table_loaded = new Promise(async (res, rej) => {
+      try {
+        self.db = await Object(_utils_db__WEBPACK_IMPORTED_MODULE_6__["connect_db"])(self.postgres_db_config);
 
-      self.location_cache_model = await Object(_models_location_cache__WEBPACK_IMPORTED_MODULE_3__["get_location_cache_model"])(
-        self.db,
-        self.postgres_db_config.schema
-      );
-    })();
+        self.location_cache_model = await Object(_models_location_cache__WEBPACK_IMPORTED_MODULE_3__["get_location_cache_model"])(
+          self.db,
+          self.postgres_db_config.schema
+        );
+
+        setInterval(async () => {
+          try {
+            await Object(_utils_common_components__WEBPACK_IMPORTED_MODULE_7__["clean_cache_in_db"])(self);
+          } catch (err) {
+            if (self.postgres_db_config.logger !== undefined) {
+              if (error.response) {
+                self.postgres_db_config.logger.error(error.response.data);
+              } else {
+                self.postgres_db_config.logger.error(error);
+              }
+            } else {
+              if (error.response) {
+                console.error(error.response.data);
+              } else {
+                console.error(error);
+              }
+            }
+          }
+        }, 60000);
+
+        res(true);
+      } catch (err) {
+        rej(err);
+      }
+    });
 
     self.any_to_fixed_float = function(f, n) {
       return parseFloat(parseFloat(f).toFixed(n));
@@ -662,6 +688,7 @@ async function connect_db({
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "merge_rectangle_results_from_db_and_api", function() { return merge_rectangle_results_from_db_and_api; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "api_call_intent", function() { return api_call_intent; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clean_cache_in_db", function() { return clean_cache_in_db; });
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var geolib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
@@ -938,6 +965,16 @@ async function api_call_intent(
   // }
 
   return data;
+}
+
+async function clean_cache_in_db(self) {
+  return await self.location_cache_model.destroy({
+    where: {
+      should_be_deleted_when: {
+        [sequelize__WEBPACK_IMPORTED_MODULE_2__["Op"].lte]: Date.now()
+      }
+    }
+  });
 }
 
 

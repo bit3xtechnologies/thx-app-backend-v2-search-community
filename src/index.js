@@ -12,7 +12,10 @@ import { get_redis } from "./utils/redis";
 
 import { connect_db } from "./utils/db";
 
-import { merge_rectangle_results_from_db_and_api } from "./utils/common_components";
+import {
+  merge_rectangle_results_from_db_and_api,
+  clean_cache_in_db
+} from "./utils/common_components";
 
 import { split_to_4_zones_by_center } from "./utils/split_to_4_zones_by_center";
 
@@ -47,14 +50,40 @@ export default function CommunitySearch(
 
     self.location_cache_model = null;
 
-    (async function() {
-      self.db = await connect_db(self.postgres_db_config);
+    self.db_and_table_loaded = new Promise(async (res, rej) => {
+      try {
+        self.db = await connect_db(self.postgres_db_config);
 
-      self.location_cache_model = await get_location_cache_model(
-        self.db,
-        self.postgres_db_config.schema
-      );
-    })();
+        self.location_cache_model = await get_location_cache_model(
+          self.db,
+          self.postgres_db_config.schema
+        );
+
+        setInterval(async () => {
+          try {
+            await clean_cache_in_db(self);
+          } catch (err) {
+            if (self.postgres_db_config.logger !== undefined) {
+              if (error.response) {
+                self.postgres_db_config.logger.error(error.response.data);
+              } else {
+                self.postgres_db_config.logger.error(error);
+              }
+            } else {
+              if (error.response) {
+                console.error(error.response.data);
+              } else {
+                console.error(error);
+              }
+            }
+          }
+        }, 60000);
+
+        res(true);
+      } catch (err) {
+        rej(err);
+      }
+    });
 
     self.any_to_fixed_float = function(f, n) {
       return parseFloat(parseFloat(f).toFixed(n));
