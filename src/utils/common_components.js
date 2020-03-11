@@ -263,9 +263,9 @@ export async function api_call_intent(
     self.http_client.request(tmpAxiosConfig)
   );
 
-  if (data && data.response && data.response.venues) {
-    console.log("API", data.response.venues, tmpAxiosConfig);
-  }
+  // if (data && data.response && data.response.venues) {
+  // console.log("API", data.response.venues, tmpAxiosConfig);
+  // }
 
   return data;
 }

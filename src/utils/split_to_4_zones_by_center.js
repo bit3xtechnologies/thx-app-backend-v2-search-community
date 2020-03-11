@@ -1,6 +1,6 @@
 import { getBoundsOfDistance } from "geolib";
 
-const default_n_in_n_km_x_n_km = 99.99;
+const default_n_in_n_km_x_n_km = 199.99;
 
 export function split_to_4_zones_by_center(
   latitude,
@@ -29,7 +29,7 @@ export function split_to_4_zones_by_center(
   const [point_e, point_d] = getBoundsOfDistance(
     { latitude, longitude },
     n * 500
-  ); //  * 1000 * 0.5
+  ); //  * 1000m * 0.5
 
   point_e.latitude = point_e.latitude.toFixed(6);
   point_e.longitude = point_e.longitude.toFixed(6);

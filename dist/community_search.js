@@ -621,7 +621,7 @@ async function connect_db({
           : false,
       benchmark: "none" === "development",
       pool: {
-        max: 8,
+        max: 4,
         min: 2,
         idle: 3000,
         acquire: 12000
@@ -933,9 +933,9 @@ async function api_call_intent(
     self.http_client.request(tmpAxiosConfig)
   );
 
-  if (data && data.response && data.response.venues) {
-    console.log("API", data.response.venues, tmpAxiosConfig);
-  }
+  // if (data && data.response && data.response.venues) {
+  // console.log("API", data.response.venues, tmpAxiosConfig);
+  // }
 
   return data;
 }
@@ -952,7 +952,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var geolib__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(geolib__WEBPACK_IMPORTED_MODULE_0__);
 
 
-const default_n_in_n_km_x_n_km = 99.99;
+const default_n_in_n_km_x_n_km = 199.99;
 
 function split_to_4_zones_by_center(
   latitude,
@@ -981,7 +981,7 @@ function split_to_4_zones_by_center(
   const [point_e, point_d] = Object(geolib__WEBPACK_IMPORTED_MODULE_0__["getBoundsOfDistance"])(
     { latitude, longitude },
     n * 500
-  ); //  * 1000 * 0.5
+  ); //  * 1000m * 0.5
 
   point_e.latitude = point_e.latitude.toFixed(6);
   point_e.longitude = point_e.longitude.toFixed(6);
