@@ -1,6 +1,6 @@
 {
   "name": "@bit3x/search-community",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "./dist/community_search.js",
   "scripts": {
     "format": "prettier --write ./**/*.json && prettier --write ./**/*.js",

@@ -160,7 +160,7 @@ export async function merge_rectangle_results_from_db_and_api(
           latitude_raw_str: `${v.location.lat}`,
           longitude_raw_str: `${v.location.lng}`,
           raw_content: cloneDeep(v),
-          should_be_deleted_when: Date.now() + cache_ttl_sec * 1000
+          should_be_deleted_when: Date.now() + cache_ttl_sec * 1000 * 21
         };
       });
 
