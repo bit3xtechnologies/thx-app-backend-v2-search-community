@@ -896,7 +896,11 @@ async function merge_rectangle_results_from_db_and_api(
       r.distance_to_center = r.distance;
     });
 
-    const sortedResult = Object(lodash__WEBPACK_IMPORTED_MODULE_0__["sortBy"])(tmpResult, ["distance_to_center"]);
+    let sortedResult = Object(lodash__WEBPACK_IMPORTED_MODULE_0__["sortBy"])(tmpResult, ["distance_to_center"]);
+
+    if (keyword !== "" && keyword !== undefined && keyword !== null) {
+      sortedResult = sortedResult.filter(r => r.name.includes(keyword));
+    }
 
     await self.redis.setex(
       tmpCacheKey,
