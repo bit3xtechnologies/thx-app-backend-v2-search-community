@@ -17,17 +17,6 @@ const foursquare_client_id = "CLIENT_ID";
 
 const foursquare_client_secret = "CLIENT_SECRET";
 
-const postgres_db_config = {
-  host: "HOST",
-  port: "5432",
-  username: "USER",
-  password: "PASSWORD",
-  database: "DB",
-  schema: "SCHEMA",
-  logging: true // OR false
-  // logger: pino // for customised logger
-};
-
 const redis_config = {
   port: 6379,
   host: "HOST",
@@ -39,11 +28,10 @@ const redis_config = {
 const cs = new CommunitySearch(
   foursquare_client_id,
   foursquare_client_secret,
-  postgres_db_config,
   redis_config
 );
 
-// wait for a while, wait for the db and redis loading
+// wait for a while, wait for redis loading
 async function f() {
   try {
     // if empty keyword, set ""

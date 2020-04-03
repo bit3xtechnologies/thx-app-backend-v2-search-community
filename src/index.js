@@ -4,35 +4,25 @@ import { sortBy, uniqBy } from "lodash";
 
 import { getDistance } from "geolib";
 
-import { get_location_cache_model } from "./models/location_cache";
-
 import { get_http_client } from "./utils/http_client";
 
 import { get_redis } from "./utils/redis";
 
-import { connect_db } from "./utils/db";
+import { fetch_rectangle_results_from_api } from "./utils/common_components";
 
-import {
-  merge_rectangle_results_from_db_and_api,
-  clean_cache_in_db,
-} from "./utils/common_components";
-
-import { split_to_4_zones_by_center } from "./utils/split_to_4_zones_by_center";
+import { split_to_5_zones_by_center } from "./utils/split_to_5_zones_by_center";
 
 export default function CommunitySearch(
   foursquare_client_id,
   foursquare_client_secret,
-  postgres_db_config,
   redis_config
 ) {
   const self = this;
 
   try {
-    self.postgres_db_config = postgres_db_config;
-
     self.limiter = new Bottleneck({
-      maxConcurrent: 15,
-      minTime: 67,
+      maxConcurrent: 30,
+      minTime: 30,
     });
 
     self.default_param = {
@@ -46,50 +36,11 @@ export default function CommunitySearch(
 
     self.redis = get_redis(redis_config);
 
-    self.db = null;
-
-    self.location_cache_model = null;
-
-    self.db_and_table_loaded = new Promise(async (res, rej) => {
-      try {
-        self.db = await connect_db(self.postgres_db_config);
-
-        self.location_cache_model = await get_location_cache_model(
-          self.db,
-          self.postgres_db_config.schema
-        );
-
-        setInterval(async () => {
-          try {
-            await clean_cache_in_db(self);
-          } catch (err) {
-            if (self.postgres_db_config.logger !== undefined) {
-              if (error.response) {
-                self.postgres_db_config.logger.error(error.response.data);
-              } else {
-                self.postgres_db_config.logger.error(error);
-              }
-            } else {
-              if (error.response) {
-                console.error(error.response.data);
-              } else {
-                console.error(error);
-              }
-            }
-          }
-        }, 60000);
-
-        res(true);
-      } catch (err) {
-        rej(err);
-      }
-    });
-
     self.any_to_fixed_float = function (f, n) {
       return parseFloat(parseFloat(f).toFixed(n));
     };
 
-    self.merge_rectangle_results_from_db_and_api = merge_rectangle_results_from_db_and_api;
+    self.fetch_rectangle_results_from_api = fetch_rectangle_results_from_api;
 
     self.get_cache_key = function (
       south_west_coordinate_latitude,
@@ -101,12 +52,12 @@ export default function CommunitySearch(
     ) {
       const converted_keyword = Buffer.from(
         keyword === undefined || keyword === null || keyword === ""
-          ? "0"
+          ? ""
           : keyword
       ).toString("base64");
 
       const converted_lang = Buffer.from(
-        lang === undefined || lang === null || lang === "" ? "0" : lang
+        lang === undefined || lang === null || lang === "" ? "en" : lang
       ).toString("base64");
 
       return `${self.any_to_fixed_float(
@@ -161,7 +112,7 @@ export default function CommunitySearch(
           throw { message: "too large, max is 100km x 100km" };
         }
 
-        const result = await self.merge_rectangle_results_from_db_and_api(
+        const result = await self.fetch_rectangle_results_from_api(
           south_west_coordinate_latitude,
           south_west_coordinate_longitude,
           north_east_coordinate_latitude,
@@ -173,20 +124,11 @@ export default function CommunitySearch(
 
         return result;
       } catch (error) {
-        if (self.postgres_db_config.logger !== undefined) {
-          if (error.response) {
-            self.postgres_db_config.logger.error(error.response.data);
-          } else {
-            self.postgres_db_config.logger.error(error);
-          }
+        if (error.response) {
+          throw error.response.data;
         } else {
-          if (error.response) {
-            console.error(error.response.data);
-          } else {
-            console.error(error);
-          }
+          throw error;
         }
-        throw error;
       }
     };
 
@@ -204,14 +146,14 @@ export default function CommunitySearch(
       );
 
       try {
-        const zs = split_to_4_zones_by_center(
+        const zs = split_to_5_zones_by_center(
           center_coordinate_latitude,
           center_coordinate_longitude
         );
 
         const tmpResults = await Promise.all(
           zs.map((z) =>
-            self.merge_rectangle_results_from_db_and_api(
+            self.fetch_rectangle_results_from_api(
               z.sw.latitude,
               z.sw.longitude,
               z.ne.latitude,
@@ -252,38 +194,20 @@ export default function CommunitySearch(
 
         return result;
       } catch (error) {
-        if (self.postgres_db_config.logger !== undefined) {
-          if (error.response) {
-            self.postgres_db_config.logger.error(error.response.data);
-          } else {
-            self.postgres_db_config.logger.error(error);
-          }
+        if (error.response) {
+          throw error.response.data;
         } else {
-          if (error.response) {
-            console.error(error.response.data);
-          } else {
-            console.error(error);
-          }
+          throw error;
         }
-        throw error;
       }
     };
 
     return self;
   } catch (error) {
-    if (self.postgres_db_config.logger !== undefined) {
-      if (error.response) {
-        self.postgres_db_config.logger.error(error.response.data);
-      } else {
-        self.postgres_db_config.logger.error(error);
-      }
+    if (error.response) {
+      throw error.response.data;
     } else {
-      if (error.response) {
-        console.error(error.response.data);
-      } else {
-        console.error(error);
-      }
+      throw error;
     }
-    throw error;
   }
 }
