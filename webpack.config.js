@@ -7,7 +7,7 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
     filename: "community_search.js",
     library: "CommunitySearch",
-    libraryTarget: "umd"
+    libraryTarget: "umd",
   },
   target: "node",
   externals: [
@@ -20,8 +20,8 @@ module.exports = {
     "lodash",
     "pg",
     "pg-hstore",
-    "sequelize"
+    "sequelize",
   ],
   cache: false,
-  watch: false
+  watch: false,
 };

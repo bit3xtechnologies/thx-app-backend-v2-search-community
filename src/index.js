@@ -14,7 +14,7 @@ import { connect_db } from "./utils/db";
 
 import {
   merge_rectangle_results_from_db_and_api,
-  clean_cache_in_db
+  clean_cache_in_db,
 } from "./utils/common_components";
 
 import { split_to_4_zones_by_center } from "./utils/split_to_4_zones_by_center";
@@ -32,14 +32,14 @@ export default function CommunitySearch(
 
     self.limiter = new Bottleneck({
       maxConcurrent: 15,
-      minTime: 67
+      minTime: 67,
     });
 
     self.default_param = {
       client_id: foursquare_client_id,
       client_secret: foursquare_client_secret,
       limit: 50,
-      v: 20200307
+      v: 20200307,
     };
 
     self.http_client = get_http_client();
@@ -85,13 +85,13 @@ export default function CommunitySearch(
       }
     });
 
-    self.any_to_fixed_float = function(f, n) {
+    self.any_to_fixed_float = function (f, n) {
       return parseFloat(parseFloat(f).toFixed(n));
     };
 
     self.merge_rectangle_results_from_db_and_api = merge_rectangle_results_from_db_and_api;
 
-    self.get_cache_key = function(
+    self.get_cache_key = function (
       south_west_coordinate_latitude,
       south_west_coordinate_longitude,
       north_east_coordinate_latitude,
@@ -124,7 +124,7 @@ export default function CommunitySearch(
       )}:${converted_keyword}:${converted_lang}`;
     };
 
-    self.get_places_in_map_view = async function(
+    self.get_places_in_map_view = async function (
       _south_west_coordinate_latitude,
       _south_west_coordinate_longitude,
       _north_east_coordinate_latitude,
@@ -150,11 +150,11 @@ export default function CommunitySearch(
           getDistance(
             {
               latitude: south_west_coordinate_latitude,
-              longitude: south_west_coordinate_longitude
+              longitude: south_west_coordinate_longitude,
             },
             {
               latitude: north_east_coordinate_latitude,
-              longitude: north_east_coordinate_longitude
+              longitude: north_east_coordinate_longitude,
             }
           ) >= 141409 // (100km*100km+100km*100km)^(1/2) meter
         ) {
@@ -190,7 +190,7 @@ export default function CommunitySearch(
       }
     };
 
-    self.get_places_in_hugearea_with_keyword = async function(
+    self.get_places_in_hugearea_with_keyword = async function (
       _center_coordinate_latitude,
       _center_coordinate_longitude,
       keyword,
@@ -210,7 +210,7 @@ export default function CommunitySearch(
         );
 
         const tmpResults = await Promise.all(
-          zs.map(z =>
+          zs.map((z) =>
             self.merge_rectangle_results_from_db_and_api(
               z.sw.latitude,
               z.sw.longitude,
@@ -224,21 +224,21 @@ export default function CommunitySearch(
         );
 
         const flatten_tmp_result = [];
-        tmpResults.forEach(r => {
-          r.forEach(v => {
+        tmpResults.forEach((r) => {
+          r.forEach((v) => {
             flatten_tmp_result.push(v);
           });
         });
 
-        flatten_tmp_result.forEach(r => {
+        flatten_tmp_result.forEach((r) => {
           r.center = {
             latitude: center_coordinate_latitude,
-            longitude: center_coordinate_longitude
+            longitude: center_coordinate_longitude,
           };
           r.distance = getDistance(
             {
               latitude: r.location.lat,
-              longitude: r.location.lng
+              longitude: r.location.lng,
             },
             r.center,
             1
@@ -247,7 +247,7 @@ export default function CommunitySearch(
         });
 
         const result = sortBy(uniqBy(flatten_tmp_result, "id"), [
-          "distance_to_center"
+          "distance_to_center",
         ]);
 
         return result;

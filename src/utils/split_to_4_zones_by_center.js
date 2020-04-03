@@ -38,29 +38,29 @@ export function split_to_4_zones_by_center(
 
   const point_a = {
     latitude: latitude.toFixed(6),
-    longitude: point_e.longitude
+    longitude: point_e.longitude,
   };
   const point_b = {
     latitude: point_d.latitude,
-    longitude: longitude.toFixed(6)
+    longitude: longitude.toFixed(6),
   };
   const point_c = {
     latitude: latitude.toFixed(6),
-    longitude: longitude.toFixed(6)
+    longitude: longitude.toFixed(6),
   };
   const point_f = {
     latitude: point_e.latitude,
-    longitude: longitude.toFixed(6)
+    longitude: longitude.toFixed(6),
   };
   const point_g = {
     latitude: latitude.toFixed(6),
-    longitude: point_d.longitude
+    longitude: point_d.longitude,
   };
 
   return [
     { sw: point_a, ne: point_b },
     { sw: point_c, ne: point_d },
     { sw: point_e, ne: point_c },
-    { sw: point_f, ne: point_g }
+    { sw: point_f, ne: point_g },
   ];
 }

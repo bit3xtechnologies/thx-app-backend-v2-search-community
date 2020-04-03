@@ -8,7 +8,7 @@ export async function connect_db({
   schema,
   database,
   logging,
-  logger
+  logger,
 }) {
   try {
     const db_config = {
@@ -33,9 +33,9 @@ export async function connect_db({
         max: 4,
         min: 2,
         idle: 3000,
-        acquire: 12000
+        acquire: 12000,
       },
-      isolationLevel: Transaction.ISOLATION_LEVELS.READ_COMMITTED
+      isolationLevel: Transaction.ISOLATION_LEVELS.READ_COMMITTED,
     };
 
     const _db = new Sequelize(db_config);

@@ -9,11 +9,11 @@ export async function get_location_cache_model(db, schema) {
         allowNull: false,
         unique: true,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
       },
       location_id: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
       },
       name: { type: DataTypes.TEXT, allowNull: false },
       keyword_str: { type: DataTypes.STRING, allowNull: false },
@@ -24,8 +24,8 @@ export async function get_location_cache_model(db, schema) {
       raw_content: { type: DataTypes.JSON, allowNull: false },
       should_be_deleted_when: {
         type: DataTypes.DATE,
-        allowNull: false
-      }
+        allowNull: false,
+      },
     },
     {
       freezeTableName: true,
@@ -40,52 +40,52 @@ export async function get_location_cache_model(db, schema) {
       schema,
       indexes: [
         {
-          fields: ["keyword_str"]
+          fields: ["keyword_str"],
         },
         {
           using: "BTREE",
-          fields: [{ attribute: "should_be_deleted_when", order: "ASC" }]
+          fields: [{ attribute: "should_be_deleted_when", order: "ASC" }],
         },
         {
           using: "HASH",
-          fields: ["location_id"]
+          fields: ["location_id"],
         },
         {
           name: "lat_asc",
           using: "BTREE",
-          fields: [{ attribute: "latitude_num", order: "ASC" }]
+          fields: [{ attribute: "latitude_num", order: "ASC" }],
         },
         {
           name: "long_asc",
           using: "BTREE",
-          fields: [{ attribute: "longitude_num", order: "ASC" }]
+          fields: [{ attribute: "longitude_num", order: "ASC" }],
         },
         {
           name: "lat_desc",
           using: "BTREE",
-          fields: [{ attribute: "latitude_num", order: "DESC" }]
+          fields: [{ attribute: "latitude_num", order: "DESC" }],
         },
         {
           name: "long_desc",
           using: "BTREE",
-          fields: [{ attribute: "longitude_num", order: "DESC" }]
+          fields: [{ attribute: "longitude_num", order: "DESC" }],
         },
         {
           name: "cache_id_desc_idx_x",
           using: "BTREE",
-          fields: [{ attribute: "cache_id", order: "DESC" }]
+          fields: [{ attribute: "cache_id", order: "DESC" }],
         },
         {
           name: "cache_id_asc_idx_x",
           using: "BTREE",
-          fields: [{ attribute: "cache_id", order: "ASC" }]
+          fields: [{ attribute: "cache_id", order: "ASC" }],
         },
         {
           name: "should_be_deleted_when_asc",
           using: "BTREE",
-          fields: [{ attribute: "should_be_deleted_when", order: "ASC" }]
-        }
-      ]
+          fields: [{ attribute: "should_be_deleted_when", order: "ASC" }],
+        },
+      ],
     }
   );
 

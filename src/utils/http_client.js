@@ -7,7 +7,7 @@ export function get_http_client() {
     url: "https://api.foursquare.com/v2/venues/search",
     method: "get",
     httpsAgent: new https.Agent({ keepAlive: true }),
-    maxContentLength: 666666
+    maxContentLength: 666666,
   });
 
   return http_client;
